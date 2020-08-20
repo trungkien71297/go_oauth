@@ -1,13 +1,21 @@
 package access_token
 
-import "github.com/trungkien71297/go_oauth/utils/errors"
+import (
+	"strings"
+
+	"github.com/trungkien71297/go_oauth/utils/errors"
+)
 
 type Service interface {
 	GetById(string) (*AccessToken, *errors.RestError)
+	Create(AccessToken) *errors.RestError
+	UpdateExpirationTime(AccessToken) *errors.RestError
 }
 
 type Repository interface {
 	GetById(string) (*AccessToken, *errors.RestError)
+	Create(AccessToken) *errors.RestError
+	UpdateExpirationTime(AccessToken) *errors.RestError
 }
 type service struct {
 	repository Repository
@@ -25,4 +33,19 @@ func (s *service) GetById(access_token_id string) (*AccessToken, *errors.RestErr
 		return nil, err
 	}
 	return accessToken, nil
+}
+
+func (s *service) Create(at AccessToken) *errors.RestError {
+	if len(strings.TrimSpace(at.AccessToken)) == 0 {
+		return &errors.RestError{
+			Code:    543,
+			Message: "token not valid",
+			Error:   "Cassiopia",
+		}
+	}
+	return s.repository.Create(at)
+}
+
+func (s *service) UpdateExpirationTime(at AccessToken) *errors.RestError {
+	return s.repository.UpdateExpirationTime(at)
 }
